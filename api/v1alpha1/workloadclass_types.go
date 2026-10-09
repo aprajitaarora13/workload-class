@@ -48,7 +48,9 @@ type DisruptionPolicy struct {
 	// +kubebuilder:validation:Minimum=0
 	MinInitialRunDurationDays int32 `json:"minInitialRunDurationDays,omitempty"`
 
-	// GraceTerminationDurationSeconds is the maximum time in seconds for a pod to terminate gracefully.
+	// GraceTerminationDurationSeconds is the duration in seconds after a pod's deletionTimestamp is set during which
+	// the controller keeps the WorkloadClass MaintenanceReadiness as NotReady to allow in-flight pod terminations to drain
+	// before further disruptions occur. It does not override Pod.spec.terminationGracePeriodSeconds or set eviction DeleteOptions.gracePeriodSeconds.
 	// +optional
 	// +kubebuilder:validation:Minimum=0
 	GraceTerminationDurationSeconds int32 `json:"graceTerminationDurationSeconds,omitempty"`
@@ -109,7 +111,12 @@ type Subject struct {
 
 // WorkloadClassSpec defines the desired state of WorkloadClass
 type WorkloadClassSpec struct {
-	// PodSelector matches the pods that this class applies to.
+	// PodSelector matches the pods in the same namespace that this class applies to.
+	// If a Namespace has the "workloads.x-k8s.io/default-class" label (DefaultWorkloadClassLabel) set,
+	// the referenced default WorkloadClass applies to all pods in that namespace and takes precedence
+	// over PodSelector matching. When no namespace default is set, the WorkloadClass with the most
+	// specific matching PodSelector (number of matchLabels + matchExpressions) takes precedence, with
+	// the oldest WorkloadClass breaking ties.
 	// +optional
 	PodSelector *metav1.LabelSelector `json:"podSelector,omitempty"`
 
@@ -127,6 +134,11 @@ const (
 )
 
 const (
+	// DefaultWorkloadClassLabel is the label key applied to a Namespace to designate a default
+	// WorkloadClass for all pods in that namespace. When set on a Namespace, the referenced
+	// WorkloadClass applies to all pods in the namespace and overrides PodSelector matching.
+	DefaultWorkloadClassLabel = "workloads.x-k8s.io/default-class"
+
 	// ConditionTypeValidated indicates if the WorkloadClass has been validated against Guardrails.
 	ConditionTypeValidated = "Validated"
 

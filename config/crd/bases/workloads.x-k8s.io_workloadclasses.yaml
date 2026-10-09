@@ -124,8 +124,10 @@ spec:
                       immediately.
                     type: boolean
                   graceTerminationDurationSeconds:
-                    description: GraceTerminationDurationSeconds is the maximum time
-                      in seconds for a pod to terminate gracefully.
+                    description: |-
+                      GraceTerminationDurationSeconds is the duration in seconds after a pod's deletionTimestamp is set during which
+                      the controller keeps the WorkloadClass MaintenanceReadiness as NotReady to allow in-flight pod terminations to drain
+                      before further disruptions occur. It does not override Pod.spec.terminationGracePeriodSeconds or set eviction DeleteOptions.gracePeriodSeconds.
                     format: int32
                     minimum: 0
                     type: integer
@@ -144,8 +146,13 @@ spec:
                     type: integer
                 type: object
               podSelector:
-                description: PodSelector matches the pods that this class applies
-                  to.
+                description: |-
+                  PodSelector matches the pods in the same namespace that this class applies to.
+                  If a Namespace has the "workloads.x-k8s.io/default-class" label (DefaultWorkloadClassLabel) set,
+                  the referenced default WorkloadClass applies to all pods in that namespace and takes precedence
+                  over PodSelector matching. When no namespace default is set, the WorkloadClass with the most
+                  specific matching PodSelector (number of matchLabels + matchExpressions) takes precedence, with
+                  the oldest WorkloadClass breaking ties.
                 properties:
                   matchExpressions:
                     description: matchExpressions is a list of label selector requirements.
