@@ -9,12 +9,12 @@ A high-level Kubernetes control layer for managing workload outcomes and disrupt
 1. **`WorkloadClassGuardrail` (Cluster-scoped)**: Defined by platform engineers to enforce cluster-wide boundaries on disruption policies (such as allowed days of the week, maximum number of maintenance windows, and maximum non-disruption duration to prevent maintenance starvation).
 2. **`WorkloadClass` (Namespace-scoped)**: Defined by workload owners to declare pod disruption policies (temporal maintenance windows, minimum initial run duration, graceful termination cool-down, and outside-of-window subject exceptions) within platform guardrails.
 
-### Pod Selection & Namespace Default Precedence
+### Pod Selection & Namespace Enforced Class Precedence
 
 A `WorkloadClass` is resolved for a Pod using the following order of precedence:
 
-1. **Namespace-level default (`workloads.x-k8s.io/default-class`)**: If a `Namespace` carries the `workloads.x-k8s.io/default-class: <workload-class-name>` label (`DefaultWorkloadClassLabel`), that `WorkloadClass` applies to all Pods in the namespace, overriding its own `spec.podSelector` as well as any other `WorkloadClass` in that namespace.
-2. **Pod label selector (`spec.podSelector`)**: If no namespace default is set, the `WorkloadClass` in the Pod's namespace whose `spec.podSelector` matches the Pod with the highest specificity (`len(matchLabels) + len(matchExpressions)`) is selected. If multiple `WorkloadClass` resources match with the same specificity, the oldest `WorkloadClass` (by `metadata.creationTimestamp`) takes precedence.
+1. **Namespace-enforced class (`workloads.x-k8s.io/enforced-class`)**: If a `Namespace` carries the `workloads.x-k8s.io/enforced-class: <workload-class-name>` label (`EnforcedWorkloadClassLabel`), that `WorkloadClass` is enforced across all Pods in the namespace, overriding its own `spec.podSelector` as well as any other `WorkloadClass` in that namespace.
+2. **Pod label selector (`spec.podSelector`)**: If no namespace-enforced class is set, Pods are matched by `spec.podSelector` in the same namespace. `WorkloadClass` selectors within a namespace should be non-overlapping; overlapping `podSelector`s are surfaced via a status `Condition` on the `WorkloadClass`.
 
 ### Relationship to Upstream `scheduling.k8s.io` `Workload`
 

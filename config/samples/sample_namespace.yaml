@@ -3,4 +3,4 @@ kind: Namespace
 metadata:
   name: sample
   labels:
-    workloads.x-k8s.io/default-class: critical-batch
+    workloads.x-k8s.io/enforced-class: critical-batch

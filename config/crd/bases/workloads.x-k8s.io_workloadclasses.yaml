@@ -148,11 +148,10 @@ spec:
               podSelector:
                 description: |-
                   PodSelector matches the pods in the same namespace that this class applies to.
-                  If a Namespace has the "workloads.x-k8s.io/default-class" label (DefaultWorkloadClassLabel) set,
-                  the referenced default WorkloadClass applies to all pods in that namespace and takes precedence
-                  over PodSelector matching. When no namespace default is set, the WorkloadClass with the most
-                  specific matching PodSelector (number of matchLabels + matchExpressions) takes precedence, with
-                  the oldest WorkloadClass breaking ties.
+                  If a Namespace has the "workloads.x-k8s.io/enforced-class" label (EnforcedWorkloadClassLabel) set,
+                  the referenced WorkloadClass is enforced for all pods in that namespace and overrides PodSelector
+                  matching. Otherwise, PodSelector selects the target pods in the namespace; overlapping PodSelectors
+                  across WorkloadClasses in the same namespace are surfaced as a status Condition.
                 properties:
                   matchExpressions:
                     description: matchExpressions is a list of label selector requirements.

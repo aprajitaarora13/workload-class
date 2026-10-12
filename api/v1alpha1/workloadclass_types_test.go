@@ -34,8 +34,12 @@ func TestAddToScheme(t *testing.T) {
 		t.Errorf("unexpected GroupVersion: %v", GroupVersion)
 	}
 
-	if DefaultWorkloadClassLabel != "workloads.x-k8s.io/default-class" {
-		t.Errorf("unexpected DefaultWorkloadClassLabel: %s", DefaultWorkloadClassLabel)
+	if EnforcedWorkloadClassLabel != "workloads.x-k8s.io/enforced-class" {
+		t.Errorf("unexpected EnforcedWorkloadClassLabel: %s", EnforcedWorkloadClassLabel)
+	}
+
+	if ReasonSelectorOverlap != "SelectorOverlap" {
+		t.Errorf("unexpected ReasonSelectorOverlap: %s", ReasonSelectorOverlap)
 	}
 
 	for _, obj := range []runtime.Object{

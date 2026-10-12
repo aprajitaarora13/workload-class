@@ -112,11 +112,10 @@ type Subject struct {
 // WorkloadClassSpec defines the desired state of WorkloadClass
 type WorkloadClassSpec struct {
 	// PodSelector matches the pods in the same namespace that this class applies to.
-	// If a Namespace has the "workloads.x-k8s.io/default-class" label (DefaultWorkloadClassLabel) set,
-	// the referenced default WorkloadClass applies to all pods in that namespace and takes precedence
-	// over PodSelector matching. When no namespace default is set, the WorkloadClass with the most
-	// specific matching PodSelector (number of matchLabels + matchExpressions) takes precedence, with
-	// the oldest WorkloadClass breaking ties.
+	// If a Namespace has the "workloads.x-k8s.io/enforced-class" label (EnforcedWorkloadClassLabel) set,
+	// the referenced WorkloadClass is enforced for all pods in that namespace and overrides PodSelector
+	// matching. Otherwise, PodSelector selects the target pods in the namespace; overlapping PodSelectors
+	// across WorkloadClasses in the same namespace are surfaced as a status Condition.
 	// +optional
 	PodSelector *metav1.LabelSelector `json:"podSelector,omitempty"`
 
@@ -134,10 +133,10 @@ const (
 )
 
 const (
-	// DefaultWorkloadClassLabel is the label key applied to a Namespace to designate a default
-	// WorkloadClass for all pods in that namespace. When set on a Namespace, the referenced
+	// EnforcedWorkloadClassLabel is the label key applied to a Namespace to enforce a single
+	// WorkloadClass across all pods in that namespace. When set on a Namespace, the referenced
 	// WorkloadClass applies to all pods in the namespace and overrides PodSelector matching.
-	DefaultWorkloadClassLabel = "workloads.x-k8s.io/default-class"
+	EnforcedWorkloadClassLabel = "workloads.x-k8s.io/enforced-class"
 
 	// ConditionTypeValidated indicates if the WorkloadClass has been validated against Guardrails.
 	ConditionTypeValidated = "Validated"
@@ -148,6 +147,8 @@ const (
 	ReasonValidationFailed = "ValidationFailed"
 	// ReasonNoGuardrails indicates that no Guardrails were found to validate against.
 	ReasonNoGuardrails = "NoGuardrails"
+	// ReasonSelectorOverlap indicates that the WorkloadClass PodSelector overlaps with another WorkloadClass in the same namespace.
+	ReasonSelectorOverlap = "SelectorOverlap"
 )
 
 // WorkloadClassStatus defines the observed state of WorkloadClass.
