@@ -1,0 +1,27 @@
+apiVersion: workloads.x-k8s.io/v1alpha1
+kind: WorkloadClass
+metadata:
+  name: critical-batch
+  namespace: sample
+spec:
+  podSelector:
+    matchLabels:
+      role: batch-processor
+  disruptionPolicy:
+    allowedDisruptionWindows:
+      - name: "weekend-maintenance"
+        daysOfWeek:
+          - Saturday
+          - Sunday
+        startTime: "00:00"
+        endTime: "04:00"
+        timeZone: "America/Toronto"
+    minInitialRunDurationDays: 2
+    maxNonDisruptionDurationDays: 1
+    allowedDisruptionsOutsideOfWindow:
+      - kind: ServiceAccount
+        name: vpa-updater
+        namespace: kube-system
+      - kind: ServiceAccount
+        name: cluster-autoscaler
+        namespace: kube-system

@@ -1,0 +1,12 @@
+apiVersion: workloads.x-k8s.io/v1alpha1
+kind: WorkloadClassGuardrail
+metadata:
+  name: default
+spec:
+  constraints:
+    disruption:
+      daysOfWeek:
+        - Saturday
+        - Sunday
+      maxAllowedWindows: 2
+      maxNonDisruptionDurationDays: 30
