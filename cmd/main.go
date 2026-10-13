@@ -36,6 +36,8 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/webhook"
 
 	workloadsv1alpha1 "sigs.k8s.io/workload-class/api/v1alpha1"
+	"sigs.k8s.io/workload-class/internal/controller"
+	webhookv1alpha1 "sigs.k8s.io/workload-class/internal/webhook/v1alpha1"
 	// +kubebuilder:scaffold:imports
 )
 
@@ -177,6 +179,20 @@ func main() {
 		os.Exit(1)
 	}
 
+	if err := (&controller.WorkloadClassGuardrailReconciler{
+		Client: mgr.GetClient(),
+		Scheme: mgr.GetScheme(),
+	}).SetupWithManager(mgr); err != nil {
+		setupLog.Error(err, "Failed to create controller", "controller", "WorkloadClassGuardrail")
+		os.Exit(1)
+	}
+	// nolint:goconst
+	if os.Getenv("ENABLE_WEBHOOKS") != "false" {
+		if err := webhookv1alpha1.SetupWorkloadClassGuardrailWebhookWithManager(mgr); err != nil {
+			setupLog.Error(err, "Failed to create webhook", "webhook", "WorkloadClassGuardrail")
+			os.Exit(1)
+		}
+	}
 	// +kubebuilder:scaffold:builder
 
 	if err := mgr.AddHealthzCheck("healthz", healthz.Ping); err != nil {

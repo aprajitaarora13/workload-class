@@ -25,6 +25,7 @@ import (
 // DisruptionPolicy specifies the policy governing pod disruptions.
 type DisruptionPolicy struct {
 	// AllowedDisruptionWindows defines when disruptions are allowed.
+	// When unset or empty, disruptions are allowed at all times on all days of the week.
 	// +listType=map
 	// +listMapKey=name
 	// +optional
@@ -39,6 +40,7 @@ type DisruptionPolicy struct {
 
 	// MaxNonDisruptionDurationDays is the maximum duration a workload can remain undisrupted.
 	// If exceeded, maintenance takes precedence over per-pod run-duration hints.
+	// When unset (0), no upper bound is placed on how long the workload can remain undisrupted.
 	// +optional
 	// +kubebuilder:validation:Minimum=0
 	MaxNonDisruptionDurationDays int32 `json:"maxNonDisruptionDurationDays,omitempty"`
@@ -67,7 +69,8 @@ type DisruptionWindow struct {
 	// +kubebuilder:validation:MinLength=1
 	Name string `json:"name"`
 
-	// DaysOfWeek specifies the days of the week (Monday-Sunday).
+	// DaysOfWeek specifies the days of the week (Monday-Sunday) on which the window starts.
+	// When unset or empty, the window applies to every day of the week.
 	// +optional
 	DaysOfWeek []string `json:"daysOfWeek,omitempty"`
 
