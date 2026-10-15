@@ -43,14 +43,17 @@ spec:
                 description: DisruptionPolicy specifies the policy governing pod disruptions.
                 properties:
                   allowedDisruptionWindows:
-                    description: AllowedDisruptionWindows defines when disruptions
-                      are allowed.
+                    description: |-
+                      AllowedDisruptionWindows defines when disruptions are allowed.
+                      When unset or empty, disruptions are allowed at all times on all days of the week.
                     items:
                       description: DisruptionWindow defines a temporal window when
                         disruptions are allowed.
                       properties:
                         daysOfWeek:
-                          description: DaysOfWeek specifies the days of the week (Monday-Sunday).
+                          description: |-
+                            DaysOfWeek specifies the days of the week (Monday-Sunday) on which the window starts.
+                            When unset or empty, the window applies to every day of the week.
                           items:
                             type: string
                           type: array
@@ -139,6 +142,7 @@ spec:
                     description: |-
                       MaxNonDisruptionDurationDays is the maximum duration a workload can remain undisrupted.
                       If exceeded, maintenance takes precedence over per-pod run-duration hints.
+                      When unset (0), no upper bound is placed on how long the workload can remain undisrupted.
                     format: int32
                     minimum: 0
                     type: integer
